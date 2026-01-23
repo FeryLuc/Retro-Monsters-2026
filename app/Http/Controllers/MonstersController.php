@@ -14,4 +14,7 @@ class MonstersController extends Controller
     public function show(Monster $monster){
         return view('monsters.show', compact('monster'));
     }
+    public function create(){
+        return view('monsters.create');
+    }
 }

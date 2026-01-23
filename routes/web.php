@@ -18,3 +18,4 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', [HomeController::class, 'home'])->name('pages.home');
 Route::get('/monsters', [MonstersController::class, 'index'])->name('monsters.index');
 Route::get('/monsters/{monster}/{slug}', [MonstersController::class, 'show'])->name('monsters.show');
+Route::get('/monsters/create', [MonstersController::class, 'create'])->name('monsters.create');
