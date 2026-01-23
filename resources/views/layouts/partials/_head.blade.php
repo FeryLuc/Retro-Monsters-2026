@@ -23,23 +23,23 @@
     />
     <script src="https://cdn.jsdelivr.net/npm/nouislider/distribute/nouislider.min.js"></script>
     <style>
-        .monster-card[data-monster-type="cosmique"] {
+        .monster-card[data-monster-type="Cosmique"] {
         background: linear-gradient(to right, #6e48aa, #9d50bb);
         }
 
-        .monster-card[data-monster-type="aquatique"] {
+        .monster-card[data-monster-type="Aquatique"] {
         background: linear-gradient(to right, #395ca6, #546da4);
         }
 
-        .monster-card[data-monster-type="terrestre"] {
+        .monster-card[data-monster-type="Terrestre"] {
         background: linear-gradient(to right, #3a4146, #657581);
         }
 
-        .monster-card[data-monster-type="volant"] {
+        .monster-card[data-monster-type="Volant"] {
         background: linear-gradient(to right, #2e5063, #457791);
         }
 
-        .monster-card[data-monster-type="spectral"] {
+        .monster-card[data-monster-type="Spectral"] {
         background: linear-gradient(to right, #7b195a, #9d3078);
         }
         body {
