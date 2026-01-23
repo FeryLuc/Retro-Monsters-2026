@@ -21,4 +21,7 @@ class Monster extends Model
     public function shortDescription($limit = 45, $cut = '[...]'){
         return Str::limit($this->description, $limit, $cut);
     }
+    public function slugify(){
+        return Str::slug($this->name);
+    }
 }
