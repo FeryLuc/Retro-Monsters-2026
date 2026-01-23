@@ -6,7 +6,7 @@
 >
 <a
     class="block bg-gray-900 text-white px-4 py-2 hover:bg-gray-700"
-    href="#"
+    href="{{route('monsters.create')}}"
     >Ajouter un monstre</a
 >
 <!-- <a
