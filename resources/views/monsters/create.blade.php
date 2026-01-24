@@ -36,7 +36,7 @@
                         placeholder="Description de votre monstre"
                         ></textarea>
                     </div>
-                    <div class="flex gap-8">
+                    <div class="flex flex-col gap-8 sm:flex-row">
                         <div class="flex-1">
                             <label for="type" class="block mb-1">Type</label>
                             <select required name="type" id="type" class="w-full border rounded px-3 py-2 text-gray-700">
@@ -70,7 +70,7 @@
                         <label for="image" class="block mb-1">Upload d'une image</label>
                         <input required type="file" name="image_url" id="image" accept="image/*" class="w-1/2 border rounded px-3 py-2">
                     </div>
-                    <div class="flex justify-between gap-8">
+                    <div class="flex flex-col justify-between gap-8 sm:flex-row">
                         <div class="flex-1">
                             <label for="pv" class="block mb-1">PV</label>
                             <input required type="number" name="pv" id="pv" min="10" max="200" class="w-full text-gray-700 border rounded px-3 py-2">

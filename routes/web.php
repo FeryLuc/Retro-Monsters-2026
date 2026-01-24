@@ -16,11 +16,14 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', [HomeController::class, 'home'])->name('pages.home');
+
 Route::get('/monsters', [MonstersController::class, 'index'])->name('monsters.index');
 
 Route::get('/monsters/create', [MonstersController::class, 'create'])->name('monsters.create');
 
 Route::post('/monsters', [MonstersController::class, 'store'])->name('monsters.store');
+
+Route::get('/monsters/{monster}/edit', [MonstersController::class, 'edit'])->name('monsters.edit');
 
 Route::delete('/monsters/{monster}', [MonstersController::class, 'destroy'])->name('monsters.destroy');
 
