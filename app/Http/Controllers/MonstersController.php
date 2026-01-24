@@ -25,6 +25,12 @@ class MonstersController extends Controller
         $users = User::get();
         return view('monsters.create', compact('types', 'rareties', 'users'));
     }
+    public function edit(Monster $monster){
+        $types = Type::get();
+        $rareties = Rarety::get();
+        $users = User::get();
+        return view('monsters.edit', compact('types', 'rareties', 'users', 'monster'));
+    }
     public function store(Request $request){
 
         // Validation simple
