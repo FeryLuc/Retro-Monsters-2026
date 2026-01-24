@@ -72,7 +72,7 @@
         </div>
         {{-- Muavaise pratique - voir la publication de la pagination pour une customisation plus pro et controlée --}}
         <style>
-            nav > div.hidden {
+            main section div:nth-of-type(2) > nav > div.hidden {
                 gap: 8px;
                 flex-direction: column;
                 align-items: center;

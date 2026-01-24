@@ -30,3 +30,5 @@ Route::put('/monsters/{monster}', [MonstersController::class, 'update'])->name('
 Route::delete('/monsters/{monster}', [MonstersController::class, 'destroy'])->name('monsters.destroy');
 
 Route::get('/monsters/{monster}/{slug}', [MonstersController::class, 'show'])->name('monsters.show');
+
+Route::get('/monsters/result', [MonstersController::class, 'search'])->name('monsters.search');

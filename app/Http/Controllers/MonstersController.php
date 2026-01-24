@@ -134,4 +134,22 @@ class MonstersController extends Controller
 
         return redirect()->route('monsters.index')->with('success', 'Monstre supprimé');
     }
+    public function search(Request $request){
+        $request->validate([
+            'texte' => 'nullable|string|max:255',
+        ]);
+        //instance vide pour pouvoir ajouter des filtre optionnels et envoyer plus tard a la vue.
+        $query = Monster::query();
+
+        if($request->filled('texte')){
+            $search = $request->texte;
+
+            $query->where(function ($m) use($search){
+                $m->where('name', 'LIKE', "%{$search}%")
+                ->orWhere('description', 'LIKE', "%{$search}%");
+            });
+        }
+        $monsters = $query->paginate(9);
+        return view('monsters.index', compact('monsters'));
+    }
 }
