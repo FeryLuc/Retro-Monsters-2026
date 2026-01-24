@@ -67,5 +67,21 @@
         @endforeach
         <!-- Répétez pour d'autres monstres -->
         </div>
+        <div class="mt-10 flex justify-center">
+            {{$monsters->links()}}
+        </div>
+        {{-- Muavaise pratique - voir la publication de la pagination pour une customisation plus pro et controlée --}}
+        <style>
+            nav > div.hidden {
+                gap: 8px;
+                flex-direction: column;
+                align-items: center;
+            }
+            /* nav > div.hidden div:nth-of-type(2) span{
+                background-color: blueviolet;
+                color: white
+            } */
+        </style>
+     
     </section>
 @endsection

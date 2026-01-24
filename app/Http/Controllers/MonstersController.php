@@ -13,7 +13,7 @@ use Illuminate\Support\Str;
 class MonstersController extends Controller
 {
     public function index(){
-        $monsters = Monster::orderBy('created_at', 'desc')->limit(9)->get();
+        $monsters = Monster::orderBy('created_at', 'desc')->paginate(9);
         return view('monsters.index', compact('monsters'));
     }
     public function show(Monster $monster){
