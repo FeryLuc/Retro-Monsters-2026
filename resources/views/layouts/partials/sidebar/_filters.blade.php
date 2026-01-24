@@ -1,5 +1,5 @@
 <form
-    action="/recherche-criteres"
+    action="{{route('monsters.filter')}}"
     method="GET"
     class="bg-gray-700 rounded-lg shadow-lg p-4"
 >

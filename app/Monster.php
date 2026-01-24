@@ -27,6 +27,9 @@ class Monster extends Model
     public function user(){
         return $this->belongsTo(User::class, 'user_id');
     }
+    public function rarety(){
+        return $this->belongsTo(Rarety::class);
+    }
 
     //UTILITAIRES
     public function shortDescription($limit = 45, $cut = '[...]'){

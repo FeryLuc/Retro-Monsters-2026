@@ -152,4 +152,48 @@ class MonstersController extends Controller
         $monsters = $query->paginate(9);
         return view('monsters.index', compact('monsters'));
     }
+    public function filter(Request $request){
+        $request->validate([
+            'type' => 'nullable|string',
+            'rarete' => 'nullable|string',
+            'min_pv' => 'nullable|numeric',
+            'max_pv' => 'nullable|numeric',
+            'min_attaque' => 'nullable|numeric',
+            'max_attaque' => 'nullable|numeric',
+        ]);
+
+        $query = Monster::query();
+        if ($request->filled('type')) {
+            $query->whereHas('type', function ($m) use ($request){
+                $m->where('name', $request->type);
+            });
+        }
+        if ($request->filled('rarete')) {
+            $query->whereHas('rarety', function ($q) use ($request) {
+            $q->where('name', $request->rarete);
+            });
+        }
+        //PV
+        if ($request->filled('min_pv')) {
+            $query->where('pv', '>=', $request->min_pv);
+        }
+
+        if ($request->filled('max_pv')) {
+            $query->where('pv', '<=', $request->max_pv);
+        }
+
+        //Attaque
+        if ($request->filled('min_attaque')) {
+            $query->where('attack', '>=', $request->min_attaque);
+        }
+
+        if ($request->filled('max_attaque')) {
+            $query->where('attack', '<=', $request->max_attaque);
+        }
+
+        $monsters = $query->paginate(9);
+
+        return view('monsters.index', compact('monsters'));
+
+    }
 }
