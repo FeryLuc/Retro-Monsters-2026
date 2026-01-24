@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use App\Monster;
 use App\Type;
 use App\Rarety;
@@ -21,53 +22,62 @@ class MonstersController extends Controller
     public function create(){
         $types = Type::get();
         $rareties = Rarety::get();
-        $users= User::get();
+        $users = User::get();
         return view('monsters.create', compact('types', 'rareties', 'users'));
     }
-   public function store(Request $request)
-{
-    // Validation simple
-    $validated = $request->validate([
-        'name' => 'required|string|max:255',
-        'description' => 'required|string',
-        'pv' => 'required|integer|min:10|max:200',
-        'attack' => 'required|integer|min:10|max:200',
-        'defense' => 'required|integer|min:10|max:200',
-        'type' => 'required|exists:monster_types,id',
-        'rarety' => 'required|exists:rareties,id',
-        'trainer' => 'required|exists:users,id',
-        'image_url' => 'required|image|mimes:jpg,jpeg,png,gif|max:2048',
-    ]);
+    public function store(Request $request){
 
-    //Upload image
-    if ($request->hasFile('image_url')) {
-        $file = $request->file('image_url');
+        // Validation simple
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'description' => 'required|string',
+            'pv' => 'required|integer|min:10|max:200',
+            'attack' => 'required|integer|min:10|max:200',
+            'defense' => 'required|integer|min:10|max:200',
+            'type' => 'required|exists:monster_types,id',
+            'rarety' => 'required|exists:rareties,id',
+            'trainer' => 'required|exists:users,id',
+            'image_url' => 'required|image|mimes:jpg,jpeg,png,gif|max:2048',
+        ]);
 
-        $filename = Str::slug(pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME))
-                    . '-' . time() 
-                    . '.' . $file->getClientOriginalExtension();
+        //Upload image
+        if ($request->hasFile('image_url')) {
+            $file = $request->file('image_url');
 
-        // stocke dans storage/app/public/monsters
-        $path = $file->storeAs('monsters', $filename, 'public');
+            $filename = Str::slug(pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME))
+                        . '-' . time() 
+                        . '.' . $file->getClientOriginalExtension();
 
-        $validated['image_url'] = $path;
+            // stocke dans storage/app/public/monsters
+            $path = $file->storeAs('monsters', $filename, 'public');
+
+            $validated['image_url'] = $path;
+        }
+
+        // Ajustement des noms de colonnes pour correspondre au fillable
+        $validated['type_id'] = $validated['type'];
+        unset($validated['type']);
+
+        $validated['rarety_id'] = $validated['rarety'];
+        unset($validated['rarety']);
+
+        $validated['user_id'] = $validated['trainer']; 
+        unset($validated['trainer']);
+
+        // Création du monstre
+        Monster::create($validated);
+
+        //Redirection
+        return redirect()->route('monsters.index')
+                        ->with('success', 'Monstre ajouté avec succès !');
     }
+    public function destroy(Monster $monster){
+        
+        if ($monster->getRawOriginal('image_url')) {
+            Storage::disk('public')->delete($monster->getRawOriginal('image_url'));
+        }
+        $monster->delete();
 
-    // Ajustement des noms de colonnes pour correspondre au fillable
-    $validated['type_id'] = $validated['type'];
-    unset($validated['type']);
-
-    $validated['rarety_id'] = $validated['rarety'];
-    unset($validated['rarety']);
-
-    $validated['user_id'] = $validated['trainer']; 
-    unset($validated['trainer']);
-
-    // Création du monstre
-    Monster::create($validated);
-
-    //Redirection
-    return redirect()->route('monsters.index')
-                     ->with('success', 'Monstre ajouté avec succès !');
-}
+        return redirect()->route('monsters.index')->with('success', 'Monstre supprimé');
+    }
 }
