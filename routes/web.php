@@ -32,3 +32,5 @@ Route::delete('/monsters/{monster}', [MonstersController::class, 'destroy'])->na
 Route::get('/monsters/{monster}/{slug}', [MonstersController::class, 'show'])->name('monsters.show');
 
 Route::get('/monsters/result', [MonstersController::class, 'search'])->name('monsters.search');
+
+Route::get('/monsters/filters-result', [MonstersController::class, 'filter'])->name('monsters.filter');
