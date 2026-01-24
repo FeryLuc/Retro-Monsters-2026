@@ -31,6 +31,54 @@ class MonstersController extends Controller
         $users = User::get();
         return view('monsters.edit', compact('types', 'rareties', 'users', 'monster'));
     }
+    public function update(Request $request, Monster $monster){
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'description' => 'required|string',
+            'pv' => 'required|integer|min:10|max:200',
+            'attack' => 'required|integer|min:10|max:200',
+            'defense' => 'required|integer|min:10|max:200',
+            'type' => 'required|exists:monster_types,id',
+            'rarety' => 'required|exists:rareties,id',
+            'trainer' => 'required|exists:users,id',
+            'image_url' => 'nullable|image|mimes:jpg,jpeg,png,gif|max:2048',
+        ]);
+
+        // Ajustement des noms de colonnes pour correspondre au fillable
+        $validated['type_id'] = $validated['type'];
+        unset($validated['type']);
+
+        $validated['rarety_id'] = $validated['rarety'];
+        unset($validated['rarety']);
+
+        $validated['user_id'] = $validated['trainer']; 
+        unset($validated['trainer']);
+
+        //Upload image
+        if ($request->hasFile('image_url')) {
+            // Supprimer l’ancienne image si elle existe
+            $oldImagePath = $monster->getRawOriginal('image_url');
+            if ($oldImagePath && Storage::disk('public')->exists($oldImagePath)) {
+                Storage::disk('public')->delete($oldImagePath);
+            }
+            $file = $request->file('image_url');
+            $filename = Str::slug(pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME))
+                        . '-' . time() 
+                        . '.' . $file->getClientOriginalExtension();
+
+            // stocke dans storage/app/public/monsters
+            $path = $file->storeAs('monsters', $filename, 'public');
+
+            $validated['image_url'] = $path;
+        } else{
+            //Supprime la prop image_url du validate pour garder l'ancienne image sinon null sera stocké et écrasera l'ancienne image.
+            unset($validated['image_url']);
+        }
+
+        $monster->update($validated);
+        //with('clé','valeur') envoie des info a la session, des info "flash", qui n'existe plus après ouverture. on peut décidéer de les afficher garce a la methode session ddans les vues avec un petit if.
+        return redirect()->route('monsters.show', ['monster'=>$monster->id ,'slug'=>$monster->slugify()])->with('success', 'Monstre modifié avec succès !');
+    }
     public function store(Request $request){
 
         // Validation simple

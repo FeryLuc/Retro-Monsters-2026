@@ -12,8 +12,9 @@
                 <h2 class="text-2xl font-bold mb-4 text-center creepster">
                   Modifier le monstre
                 </h2>
-                <form class="space-y-6" action="" method="POST" enctype="multipart/form-data">
+                <form class="space-y-6" action="{{route('monsters.update', ['monster'=>$monster->id])}}" method="POST" enctype="multipart/form-data">
                     @csrf
+                    @method('PUT')
                     <div class="flex flex-col gap-6 md:flex-row">
                         <div class="flex-1 self-center">
                             <img src="{{$monster->image_url}}" alt="{{$monster->name}}" class="w-full h-auto rounded-xl object-cover">
@@ -95,7 +96,7 @@
                    
                     <div>
                         <label for="image" class="block mb-1">Upload d'une image</label>
-                        <input required type="file" name="image_url" id="image" accept="image/*" class="w-1/2 border rounded px-3 py-2">
+                        <input type="file" name="image_url" id="image" accept="image/*" class="w-1/2 border rounded px-3 py-2">
                     </div>
 
                  
