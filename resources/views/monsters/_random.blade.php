@@ -8,7 +8,7 @@
             <div class="w-full md:w-1/2 relative">
             <img
                 class="w-full h-full object-cover rounded-t-lg md:rounded-l-lg md:rounded-t-none"
-                src="{{asset("images/{$randMonster->image_url}")}}"
+                src="{{$randMonster->image_url}}"
                 alt="{{$randMonster->name}}"
             />
             <div class="absolute top-4 right-4">
@@ -37,7 +37,7 @@
             </p>
             <div class="mb-4">
                 <strong class="text-white">Créateur:</strong>
-                <span class="text-red-400">{{$randMonster->user->name}}</span>
+                <span class="text-red-400">{{$randMonster->user?->name ?? 'NULL'}}</span>
             </div>
             <div class="mb-4">
                 <div>

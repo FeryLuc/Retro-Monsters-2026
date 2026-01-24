@@ -12,17 +12,81 @@
                 <h2 class="text-2xl font-bold mb-4 text-center creepster">
                   Ajouter un monstre
                 </h2>
-                <form class="space-y-6">
-                  <div>
-                    <label for="name" class="block mb-1">Nom</label>
-                    <input
-                      type="text"
-                      id="name"
-                      class="w-full border rounded px-3 py-2 text-gray-700"
-                      placeholder="Nom du Monstre"
-                    />
-                  </div>
-                  <div>Ajoutez ici les autres champs...</div>
+                <form class="space-y-6" action="{{route('monsters.store')}}" method="POST" enctype="multipart/form-data">
+                    @csrf
+                    <div>
+                        <label for="name" class="block mb-1">Nom</label>
+                        <input
+                        required
+                        type="text"
+                        name="name"
+                        id="name"
+                        class="w-full border rounded px-3 py-2 text-gray-700"
+                        placeholder="Nom du Monstre"
+                        />
+                    </div>
+                    <div>
+                        <label for="description" class="block mb-1">description</label>
+                        <textarea
+                        required
+                        type="text"
+                        name="description"
+                        id="description"
+                        class="w-full border rounded px-3 py-2 text-gray-700 resize-none"
+                        placeholder="Description de votre monstre"
+                        ></textarea>
+                    </div>
+                    <div class="flex gap-8">
+                        <div class="flex-1">
+                            <label for="type" class="block mb-1">Type</label>
+                            <select required name="type" id="type" class="w-full border rounded px-3 py-2 text-gray-700">
+                                <option selected>Choisissez un type</option>
+                                @foreach ($types as $type)
+                                    <option value="{{$type->id}}">{{$type->name}}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="flex-1">
+                            <label for="rarety" class="block mb-1">Rareté</label>
+                            <select required name="rarety" id="rarety" class="w-full border rounded px-3 py-2 text-gray-700">
+                                <option selected>Choisissez une rareté</option>
+                                @foreach ($rareties as $rarety)
+                                    <option value="{{$rarety->id}}">{{$rarety->name}}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="flex-1">
+                            <label for="trainer" class="block mb-1">Trainer</label>
+                            <select required name="trainer" id="trainer" class="w-full border rounded px-3 py-2 text-gray-700">
+                                <option selected>Choisissez un entraineur</option>
+                                @foreach ($users as $user)
+                                    <option value="{{$user->id}}">{{$user->name}}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
+                   
+                    <div>
+                        <label for="image" class="block mb-1">Upload d'une image</label>
+                        <input required type="file" name="image_url" id="image" accept="image/*" class="w-1/2 border rounded px-3 py-2">
+                    </div>
+                    <div class="flex justify-between gap-8">
+                        <div class="flex-1">
+                            <label for="pv" class="block mb-1">PV</label>
+                            <input required type="number" name="pv" id="pv" min="10" max="200" class="w-full text-gray-700 border rounded px-3 py-2">
+                        </div>
+                        <div class="flex-1">
+                            <label for="attack" class="block mb-1">Attack</label>
+                            <input required type="number" name="attack" id="attack" min="10" max="200" class="w-full text-gray-700 border rounded px-3 py-2">
+                        </div>
+                        <div class="flex-1">
+                            <label for="defense" class="block mb-1">Defense</label>
+                            <input required type="number" name="defense" id="defense" min="10" max="200" class="w-full text-gray-700 border rounded px-3 py-2">
+                        </div>
+                        <button id="stats-generator" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Générer</button>
+                    </div>
+                 
+                
                   <div class="flex justify-between items-center">
                     <button
                       type="submit"

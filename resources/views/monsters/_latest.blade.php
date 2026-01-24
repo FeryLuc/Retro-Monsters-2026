@@ -10,14 +10,14 @@
             data-monster-type="{{$monster->type->name}}">
             <img
             class="w-full h-48 object-cover rounded-t-lg"
-            src="{{asset("images/{$monster->image_url}")}}"
+            src="{{$monster->image_url}}"
             alt="{{$monster->name}}"
             />
             <div class="p-4">
             <h3 class="text-xl font-bold">{{$monster->name}}</h3>
             <h4 class="mb-2">
                 <a href="#" class="text-red-400 hover:underline"
-                >{{$monster->user->name}}</a
+                >{{$monster->user?->name ?? 'NULL'}}</a
                 >
             </h4>
             <p class="text-gray-300 text-sm mb-2">
