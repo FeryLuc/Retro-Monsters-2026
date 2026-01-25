@@ -3,5 +3,5 @@
 @include('layouts.partials.sidebar._search')
 
 <!-- Formulaire de Recherche par Critères -->
-@include('layouts.partials.sidebar._filters')
+@include('layouts.partials.sidebar._filters', ['types' => App\Type::get(), 'rareties' => App\Rarety::get()])
 </aside>
