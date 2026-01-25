@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\HomeController;
+use App\Http\Controllers\MonstersController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -13,8 +15,22 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
-});
+Route::get('/', [HomeController::class, 'home'])->name('pages.home');
 
-Route::get('/home', 'HomeController@index')->name('home');
+Route::get('/monsters', [MonstersController::class, 'index'])->name('monsters.index');
+
+Route::get('/monsters/create', [MonstersController::class, 'create'])->name('monsters.create');
+
+Route::post('/monsters', [MonstersController::class, 'store'])->name('monsters.store');
+
+Route::get('/monsters/{monster}/edit', [MonstersController::class, 'edit'])->name('monsters.edit');
+
+Route::put('/monsters/{monster}', [MonstersController::class, 'update'])->name('monsters.update');
+
+Route::delete('/monsters/{monster}', [MonstersController::class, 'destroy'])->name('monsters.destroy');
+
+Route::get('/monsters/{monster}/{slug}', [MonstersController::class, 'show'])->name('monsters.show');
+
+Route::get('/monsters/result', [MonstersController::class, 'search'])->name('monsters.search');
+
+Route::get('/monsters/filters-result', [MonstersController::class, 'filter'])->name('monsters.filter');
