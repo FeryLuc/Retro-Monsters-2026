@@ -8,20 +8,17 @@
     <!-- Type -->
     <select name="type" class="w-full p-2 mb-4 bg-gray-800 rounded">
     <option value="" disabled selected>Choisir un type</option>
-    <option value="aquatique">Aquatique</option>
-    <option value="terrestre">Terrestre</option>
-    <option value="volant">Volant</option>
-    <option value="cosmique">Cosmique</option>
-    <option value="spectral">Spectral</option>
+    @foreach ($types as $type)
+        <option value="{{$type->name}}">{{$type->name}}</option>
+    @endforeach
     </select>
 
     <!-- Rareté -->
     <select name="rarete" class="w-full p-2 mb-4 bg-gray-800 rounded">
     <option value="" disabled selected>Choisir une rareté</option>
-    <option value="commun">Commun</option>
-    <option value="rare">Rare</option>
-    <option value="epique">Épique</option>
-    <option value="legendaire">Légendaire</option>
+    @foreach ($rareties as $rarety)
+        <option value="{{$rarety->name}}">{{$rarety->name}}</option>
+    @endforeach
     </select>
 
     <!-- PV -->
