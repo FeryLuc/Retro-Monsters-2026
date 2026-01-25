@@ -156,10 +156,10 @@ class MonstersController extends Controller
         $request->validate([
             'type' => 'nullable|string',
             'rarete' => 'nullable|string',
-            'min_pv' => 'nullable|numeric',
-            'max_pv' => 'nullable|numeric',
-            'min_attaque' => 'nullable|numeric',
-            'max_attaque' => 'nullable|numeric',
+            'min_pv' => 'nullable|integer',
+            'max_pv' => 'nullable|integer',
+            'min_attaque' => 'nullable|integer',
+            'max_attaque' => 'nullable|integer',
         ]);
 
         $query = Monster::query();
@@ -169,26 +169,26 @@ class MonstersController extends Controller
             });
         }
         if ($request->filled('rarete')) {
-            $query->whereHas('rarety', function ($q) use ($request) {
-            $q->where('name', $request->rarete);
+            $query->whereHas('rarety', function ($m) use ($request) {
+            $m->where('name', $request->rarete);
             });
         }
         //PV
         if ($request->filled('min_pv')) {
-            $query->where('pv', '>=', $request->min_pv);
+            $query->where('pv', '>=',(int) $request->min_pv);
         }
 
         if ($request->filled('max_pv')) {
-            $query->where('pv', '<=', $request->max_pv);
+            $query->where('pv', '<=',(int) $request->max_pv);
         }
 
         //Attaque
         if ($request->filled('min_attaque')) {
-            $query->where('attack', '>=', $request->min_attaque);
+            $query->where('attack', '>=',(int) $request->min_attaque);
         }
 
         if ($request->filled('max_attaque')) {
-            $query->where('attack', '<=', $request->max_attaque);
+            $query->where('attack', '<=', (int) $request->max_attaque);
         }
 
         $monsters = $query->paginate(9);

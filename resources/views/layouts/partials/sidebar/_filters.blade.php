@@ -44,6 +44,11 @@
             min: 0,
             max: 200,
         },
+        step:1,
+        format: {
+            to: value => Math.round(value),
+            from: value=>Number(value)
+        }
         });
 
         sliderPv.noUiSlider.on("update", function (values, handle) {
@@ -76,6 +81,11 @@
             min: 0,
             max: 200,
         },
+        step:1,
+        format:{
+            to: value=>Math.round(value),
+            from: value=>Number(value)
+        }
         });
 
         sliderAttaque.noUiSlider.on("update", function (values, handle) {
