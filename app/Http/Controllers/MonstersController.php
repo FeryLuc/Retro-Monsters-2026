@@ -9,6 +9,7 @@ use App\Type;
 use App\Rarety;
 use App\User;
 use Illuminate\Support\Str;
+use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
 
 class MonstersController extends Controller
 {
@@ -55,23 +56,39 @@ class MonstersController extends Controller
         unset($validated['trainer']);
 
         //Upload image
+        // if ($request->hasFile('image_url')) {
+        //     // Supprimer l’ancienne image si elle existe
+        //     $oldImagePath = $monster->getRawOriginal('image_url');
+        //     if ($oldImagePath && Storage::disk('public')->exists($oldImagePath)) {
+        //         Storage::disk('public')->delete($oldImagePath);
+        //     }
+        //     $file = $request->file('image_url');
+        //     $filename = Str::slug(pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME))
+        //                 . '-' . time() 
+        //                 . '.' . $file->getClientOriginalExtension();
+
+        //     // stocke dans storage/app/public/monsters
+        //     $path = $file->storeAs('monsters', $filename, 'public');
+
+        //     $validated['image_url'] = $path;
+        // } else{
+        //     //Supprime la prop image_url du validate pour garder l'ancienne image sinon null sera stocké et écrasera l'ancienne image.
+        //     unset($validated['image_url']);
+        // }
+
         if ($request->hasFile('image_url')) {
-            // Supprimer l’ancienne image si elle existe
-            $oldImagePath = $monster->getRawOriginal('image_url');
-            if ($oldImagePath && Storage::disk('public')->exists($oldImagePath)) {
-                Storage::disk('public')->delete($oldImagePath);
+            $oldUrl = $monster->getRawOriginal('image_url');
+
+            if ($oldUrl && str_contains($oldUrl, 'cloudinary.com')) {
+                $path = parse_url($oldUrl, PHP_URL_PATH);
+                $publicId = pathinfo($path, PATHINFO_FILENAME);
+                Cloudinary::destroy('monsters/'.$publicId);
             }
-            $file = $request->file('image_url');
-            $filename = Str::slug(pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME))
-                        . '-' . time() 
-                        . '.' . $file->getClientOriginalExtension();
 
-            // stocke dans storage/app/public/monsters
-            $path = $file->storeAs('monsters', $filename, 'public');
+            $uploaded = Cloudinary::uploadFile($request->file('image_url')->getRealPath(), ['folder'=>'monsters']);
 
-            $validated['image_url'] = $path;
+            $validated['image_url'] = $uploaded->getSecurePath();
         } else{
-            //Supprime la prop image_url du validate pour garder l'ancienne image sinon null sera stocké et écrasera l'ancienne image.
             unset($validated['image_url']);
         }
 
@@ -94,18 +111,27 @@ class MonstersController extends Controller
             'image_url' => 'required|image|mimes:jpg,jpeg,png,gif|max:2048',
         ]);
 
-        //Upload image
+        //Upload image locale V
+        // if ($request->hasFile('image_url')) {
+        //     $file = $request->file('image_url');
+
+        //     $filename = Str::slug(pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME))
+        //                 . '-' . time() 
+        //                 . '.' . $file->getClientOriginalExtension();
+
+        //     // stocke dans storage/app/public/monsters
+        //     $path = $file->storeAs('monsters', $filename, 'public');
+
+        //     $validated['image_url'] = $path;
+        // }
+
         if ($request->hasFile('image_url')) {
-            $file = $request->file('image_url');
+            $uploaded = Cloudinary::uploadFile(
+                $request->file('image_url')->getRealPath(),
+                ['folder'=>'monsters']
+            );
 
-            $filename = Str::slug(pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME))
-                        . '-' . time() 
-                        . '.' . $file->getClientOriginalExtension();
-
-            // stocke dans storage/app/public/monsters
-            $path = $file->storeAs('monsters', $filename, 'public');
-
-            $validated['image_url'] = $path;
+            $validated['image_url'] = $uploaded->getSecurePath();
         }
 
         // Ajustement des noms de colonnes pour correspondre au fillable
@@ -126,9 +152,11 @@ class MonstersController extends Controller
                         ->with('success', 'Monstre ajouté avec succès !');
     }
     public function destroy(Monster $monster){
-        
-        if ($monster->getRawOriginal('image_url')) {
-            Storage::disk('public')->delete($monster->getRawOriginal('image_url'));
+        $oldUrl = $monster->getRawOriginal('image_url');
+        if ($oldUrl && str_contains($oldUrl, 'cloudinary.com')) {
+           $path = parse_url($oldUrl, PHP_URL_PATH);
+           $publicId = pathinfo($path, PATHINFO_FILENAME);
+            Cloudinary::destroy('monsters/'. $publicId);
         }
         $monster->delete();
 
