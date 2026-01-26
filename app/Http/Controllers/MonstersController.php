@@ -3,18 +3,19 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 use App\Monster;
 use App\Type;
 use App\Rarety;
 use App\User;
 use Illuminate\Support\Str;
+use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
 
 class MonstersController extends Controller
 {
     public function index(){
         $monsters = Monster::orderBy('created_at', 'desc')->paginate(9);
-        return view('monsters.index', compact('monsters'));
+        $title = 'Liste des monstres';
+        return view('monsters.index', compact('monsters', 'title'));
     }
     public function show(Monster $monster){
         return view('monsters.show', compact('monster'));
@@ -43,35 +44,28 @@ class MonstersController extends Controller
             'trainer' => 'required|exists:users,id',
             'image_url' => 'nullable|image|mimes:jpg,jpeg,png,gif|max:2048',
         ]);
-
         // Ajustement des noms de colonnes pour correspondre au fillable
         $validated['type_id'] = $validated['type'];
         unset($validated['type']);
-
         $validated['rarety_id'] = $validated['rarety'];
         unset($validated['rarety']);
-
         $validated['user_id'] = $validated['trainer']; 
         unset($validated['trainer']);
 
         //Upload image
         if ($request->hasFile('image_url')) {
-            // Supprimer l’ancienne image si elle existe
-            $oldImagePath = $monster->getRawOriginal('image_url');
-            if ($oldImagePath && Storage::disk('public')->exists($oldImagePath)) {
-                Storage::disk('public')->delete($oldImagePath);
+            $oldUrl = $monster->getRawOriginal('image_url');
+
+            if ($oldUrl && str_contains($oldUrl, 'cloudinary.com')) {
+                $path = parse_url($oldUrl, PHP_URL_PATH);
+                $publicId = pathinfo($path, PATHINFO_FILENAME);
+                Cloudinary::destroy('monsters/'.$publicId);
             }
-            $file = $request->file('image_url');
-            $filename = Str::slug(pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME))
-                        . '-' . time() 
-                        . '.' . $file->getClientOriginalExtension();
 
-            // stocke dans storage/app/public/monsters
-            $path = $file->storeAs('monsters', $filename, 'public');
+            $uploaded = Cloudinary::uploadFile($request->file('image_url')->getRealPath(), ['folder'=>'monsters']);
 
-            $validated['image_url'] = $path;
+            $validated['image_url'] = $uploaded->getSecurePath();
         } else{
-            //Supprime la prop image_url du validate pour garder l'ancienne image sinon null sera stocké et écrasera l'ancienne image.
             unset($validated['image_url']);
         }
 
@@ -80,7 +74,6 @@ class MonstersController extends Controller
         return redirect()->route('monsters.show', ['monster'=>$monster->id ,'slug'=>$monster->slugify()])->with('success', 'Monstre modifié avec succès !');
     }
     public function store(Request $request){
-
         // Validation simple
         $validated = $request->validate([
             'name' => 'required|string|max:255',
@@ -93,30 +86,23 @@ class MonstersController extends Controller
             'trainer' => 'required|exists:users,id',
             'image_url' => 'required|image|mimes:jpg,jpeg,png,gif|max:2048',
         ]);
-
-        //Upload image
-        if ($request->hasFile('image_url')) {
-            $file = $request->file('image_url');
-
-            $filename = Str::slug(pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME))
-                        . '-' . time() 
-                        . '.' . $file->getClientOriginalExtension();
-
-            // stocke dans storage/app/public/monsters
-            $path = $file->storeAs('monsters', $filename, 'public');
-
-            $validated['image_url'] = $path;
-        }
-
-        // Ajustement des noms de colonnes pour correspondre au fillable
+        // Ajustement des noms de colonnes pour correspondre au fillable. Pour éviter ça changer les name des input pour correspondre au colonne de la db !!
         $validated['type_id'] = $validated['type'];
         unset($validated['type']);
-
         $validated['rarety_id'] = $validated['rarety'];
         unset($validated['rarety']);
-
         $validated['user_id'] = $validated['trainer']; 
         unset($validated['trainer']);
+
+        //Upload image cloudinary
+        if ($request->hasFile('image_url')) {
+            $uploaded = Cloudinary::uploadFile(
+                $request->file('image_url')->getRealPath(),
+                ['folder'=>'monsters']
+            );
+
+            $validated['image_url'] = $uploaded->getSecurePath();
+        }
 
         // Création du monstre
         Monster::create($validated);
@@ -126,13 +112,15 @@ class MonstersController extends Controller
                         ->with('success', 'Monstre ajouté avec succès !');
     }
     public function destroy(Monster $monster){
-        
-        if ($monster->getRawOriginal('image_url')) {
-            Storage::disk('public')->delete($monster->getRawOriginal('image_url'));
+        $oldUrl = $monster->getRawOriginal('image_url');
+        if ($oldUrl && str_contains($oldUrl, 'cloudinary.com')) {
+           $path = parse_url($oldUrl, PHP_URL_PATH);
+           $publicId = pathinfo($path, PATHINFO_FILENAME);
+            Cloudinary::destroy('monsters/'. $publicId);
         }
         $monster->delete();
 
-        return redirect()->route('monsters.index')->with('success', 'Monstre supprimé');
+        return redirect()->route('monsters.index')->with('success', 'Monstre supprimé !');
     }
     public function search(Request $request){
         $request->validate([
@@ -144,13 +132,24 @@ class MonstersController extends Controller
         if($request->filled('texte')){
             $search = $request->texte;
 
-            $query->where(function ($m) use($search){
-                $m->where('name', 'LIKE', "%{$search}%")
-                ->orWhere('description', 'LIKE', "%{$search}%");
+            $words =preg_split('/\s+/', $search, -1, PREG_SPLIT_NO_EMPTY);
+            //Closure => fonction anonyme permettant l'import de variables externe en php.
+            //Grace à l'index mes requete sql se construire en OR et non en AND !!
+            $query->where(function ($q) use($words){
+                foreach ($words as $index => $word) {
+                    if ($index === 0) {
+                        $q->whereRaw('LOWER(name) LIKE ?', ['%' . strtolower($word) . '%'])
+                        ->orWhereRaw('LOWER(description) LIKE ?', ['%' . strtolower($word) . '%']);
+                    } else {
+                        $q->orWhereRaw('LOWER(name) LIKE ?', ['%' . strtolower($word) . '%'])
+                        ->orWhereRaw('LOWER(description) LIKE ?', ['%' . strtolower($word) . '%']);
+                    }
+                }
             });
         }
         $monsters = $query->paginate(9);
-        return view('monsters.index', compact('monsters'));
+        $title = 'Résultat de votre recherche';
+        return view('monsters.index', compact('monsters', 'title'));
     }
     public function filter(Request $request){
         $request->validate([
@@ -163,37 +162,25 @@ class MonstersController extends Controller
         ]);
 
         $query = Monster::query();
-        if ($request->filled('type')) {
-            $query->whereHas('type', function ($m) use ($request){
-                $m->where('name', $request->type);
-            });
-        }
-        if ($request->filled('rarete')) {
-            $query->whereHas('rarety', function ($m) use ($request) {
-            $m->where('name', $request->rarete);
-            });
-        }
-        //PV
-        if ($request->filled('min_pv')) {
-            $query->where('pv', '>=',(int) $request->min_pv);
-        }
+        // Définir les filtres et leur callback
+        $filters = [
+            'type' => fn($q, $value) => $q->whereHas('type', fn($m) => $m->where('name', $value)),
+            'rarete' => fn($q, $value) => $q->whereHas('rarety', fn($m) => $m->where('name', $value)),
+            'min_pv' => fn($q, $value) => $q->where('pv', '>=', (int)$value),
+            'max_pv' => fn($q, $value) => $q->where('pv', '<=', (int)$value),
+            'min_attaque' => fn($q, $value) => $q->where('attack', '>=', (int)$value),
+            'max_attaque' => fn($q, $value) => $q->where('attack', '<=', (int)$value),
+        ];
 
-        if ($request->filled('max_pv')) {
-            $query->where('pv', '<=',(int) $request->max_pv);
-        }
-
-        //Attaque
-        if ($request->filled('min_attaque')) {
-            $query->where('attack', '>=',(int) $request->min_attaque);
-        }
-
-        if ($request->filled('max_attaque')) {
-            $query->where('attack', '<=', (int) $request->max_attaque);
+        // Appliquer les filtres si présents dans la requête
+        foreach ($filters as $key => $callback) {
+            if ($request->filled($key)) {
+                $callback($query, $request->$key);
+            }
         }
 
         $monsters = $query->paginate(9);
-
-        return view('monsters.index', compact('monsters'));
-
+        $title = 'Résultat du filtrage';
+        return view('monsters.index', compact('monsters', 'title'));
     }
 }

@@ -41,18 +41,17 @@ class Monster extends Model
 
     //Accessor !!!image_url est réserver par l'accessor. Du coup pour faire référence a la colonne en db du meme nmo on utilise le tableau attribute ou getRawOriginale('image_url') pour rendre plus clean le code et éviter des boucle infinie.
     //Dans les vues on utilise la propriété image_url qui trigger cet accessor au lieu de faireréférence au champ de meme nom dans la db ! 
-    public function getImageUrlAttribute(): string
-    {
+    public function getImageUrlAttribute(){
         $path = trim($this->getRawOriginal('image_url') ?? '');
 
         if ($path === '') {
-            return asset('images/default-monster.png');
+            return asset('images/default-monster.pgn');
+        }
+        //Url Cloudinary (souvent le mm que d'autre service cloud)
+        if (str_starts_with($path, 'http')) {
+            return $path;
         }
 
-        if (str_starts_with($path, 'monsters/')) {
-            return asset('storage/' . $path);
-        }
-
-        return asset('images/' . $path);
+        return asset('images/' .$path);
     }
 }

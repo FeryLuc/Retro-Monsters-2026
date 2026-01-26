@@ -42,6 +42,9 @@
         .monster-card[data-monster-type="Spectral"] {
         background: linear-gradient(to right, #7b195a, #9d3078);
         }
+        .monster-card[data-monster-type="Légendaire"] {
+        background: linear-gradient(to right, #3d2800, #FFA500);
+        }
         body {
         font-family: "Roboto", sans-serif;
         }
